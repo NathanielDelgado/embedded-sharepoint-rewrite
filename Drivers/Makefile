@@ -17,49 +17,50 @@ ifndef PROJECT_C_INCLUDES
 $(error PROJECT_C_INCLUDES is not defined. Please provide a set of C header files.)
 endif
 
+
 ######################################
 # target
 ######################################
 ifeq ($(PROJECT_TARGET),stm32f413rht)
 	TARGET_C_SOURCES = \
-	stm32f413rht/STM32F4xx_HAL_Driver/Src/*.c
+	$(filter-out %template.c, $(wildcard stm32f413rht/STM32F4xx_HAL_Driver/Src/*.c))
 	TARGET_ASM_SOURCES = \
 	stm32f413rht/startup_stm32f413xx.s
 	TARGET_C_DEFS = \
-	-DSTM32F413xx
+	STM32F413xx
 	TARGET_C_INCLUDES = \
-	-Istm32f413rht/STM32F4xx_HAL_Driver/Inc \
-	-Istm32f413rht/STM32F4xx_HAL_Driver/Inc/Legacy \
-	-Istm32f413rht/CMSIS/Device/ST/STM32F4xx/Include \
-	-Istm32l476rgt/CMSIS/Include
+	stm32f413rht/STM32F4xx_HAL_Driver/Inc \
+	stm32f413rht/STM32F4xx_HAL_Driver/Inc/Legacy \
+	stm32f413rht/CMSIS/Device/ST/STM32F4xx/Include \
+	stm32f413rht/CMSIS/Include
 	TARGET_LDSCRIPT = \
 	stm32f413rht/STM32F413RHTx_FLASH.ld
-else ifeq ($(PROJECT_TARGET),stm32f413rht)
+else ifeq ($(PROJECT_TARGET),stm32f446ret)
 	TARGET_C_SOURCES = \
-	stm32f446ret/STM32F4xx_HAL_Driver/Src/*.c
+	$(filter-out %template.c, $(wildcard stm32f446ret/STM32F4xx_HAL_Driver/Src/*.c))
 	TARGET_ASM_SOURCES = \
 	stm32f446ret/startup_stm32f446xx.s
 	TARGET_C_DEFS = \
-	-DSTM32F446xx
+	STM32F446xx
 	TARGET_C_INCLUDES = \
-	-Istm32f446ret/STM32F4xx_HAL_Driver/Inc \
-	-Istm32f446ret/STM32F4xx_HAL_Driver/Inc/Legacy \
-	-Istm32l476rgt/CMSIS/Device/ST/STM32F4xx/Include \
-	-Istm32l476rgt/CMSIS/Include
+	stm32f446ret/STM32F4xx_HAL_Driver/Inc \
+	stm32f446ret/STM32F4xx_HAL_Driver/Inc/Legacy \
+	stm32f446ret/CMSIS/Device/ST/STM32F4xx/Include \
+	stm32f446ret/CMSIS/Include
 	TARGET_LDSCRIPT = \
 	stm32f446ret/STM32F446RETx_FLASH.ld
-else ifeq ($(PROJECT_TARGET),stm32f413rht)
+else ifeq ($(PROJECT_TARGET),stm32l476rgt)
 	TARGET_C_SOURCES = \
-	stm32l476rgt/STM32L4xx_HAL_Driver/Src/*.c
+	$(filter-out %template.c, $(wildcard stm32l476rgt/STM32L4xx_HAL_Driver/Src/*.c))
 	TARGET_ASM_SOURCES = \
 	stm32l476rgt/startup_stm32l476xx.s
 	TARGET_C_DEFS = \
-	-DSTM32L476xx
+	STM32L476xx
 	TARGET_C_INCLUDES = \
-	-Istm32l476rgt/STM32L4xx_HAL_Driver/Inc \
-	-Istm32l476rgt/STM32L4xx_HAL_Driver/Inc/Legacy \
-	-Istm32l476rgt/CMSIS/Device/ST/STM32L4xx/Include \
-	-Istm32l476rgt/CMSIS/Include
+	stm32l476rgt/STM32L4xx_HAL_Driver/Inc \
+	stm32l476rgt/STM32L4xx_HAL_Driver/Inc/Legacy \
+	stm32l476rgt/CMSIS/Device/ST/STM32L4xx/Include \
+	stm32l476rgt/CMSIS/Include
 	TARGET_LDSCRIPT = \
 	stm32l476rgt/STM32L476RGTx_FLASH.ld
 else
@@ -144,7 +145,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
-$(TARGET_C_DEFS)
+$(addprefix -D,$(TARGET_C_DEFS))
 
 
 # AS includes
@@ -152,8 +153,8 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
-$(PROJECT_C_INCLUDES) \
-$(TARGET_C_INCLUDES)
+$(addprefix -I,$(PROJECT_C_INCLUDES)) \
+$(addprefix -I,$(TARGET_C_INCLUDES))
 
 
 # compile gcc flags
@@ -223,7 +224,15 @@ $(BUILD_DIR):
 #######################################
 clean:
 	-rm -fR $(BUILD_DIR)
+
+
+#######################################
+# clean up
+#######################################
+flash:
+	-st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
   
+
 #######################################
 # dependencies
 #######################################
