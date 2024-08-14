@@ -1,4 +1,3 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    stm32f4xx_hal_conf_template.h
@@ -18,7 +17,6 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32F4xx_HAL_CONF_H
@@ -58,7 +56,7 @@
 // #define HAL_IWDG_MODULE_ENABLED
 // #define HAL_LTDC_MODULE_ENABLED
 // #define HAL_RNG_MODULE_ENABLED
-#define HAL_RTC_MODULE_ENABLED
+// #define HAL_RTC_MODULE_ENABLED
 // #define HAL_SAI_MODULE_ENABLED
 // #define HAL_SD_MODULE_ENABLED
 // #define HAL_MMC_MODULE_ENABLED

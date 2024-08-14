@@ -21,51 +21,18 @@ endif
 ######################################
 # target
 ######################################
-ifeq ($(PROJECT_TARGET),stm32f413rht)
-	TARGET_C_SOURCES = \
-	$(filter-out %template.c, $(wildcard stm32f413rht/STM32F4xx_HAL_Driver/Src/*.c))
-	TARGET_ASM_SOURCES = \
-	stm32f413rht/startup_stm32f413xx.s
-	TARGET_C_DEFS = \
-	STM32F413xx
-	TARGET_C_INCLUDES = \
-	stm32f413rht/STM32F4xx_HAL_Driver/Inc \
-	stm32f413rht/STM32F4xx_HAL_Driver/Inc/Legacy \
-	stm32f413rht/CMSIS/Device/ST/STM32F4xx/Include \
-	stm32f413rht/CMSIS/Include
-	TARGET_LDSCRIPT = \
-	stm32f413rht/STM32F413RHTx_FLASH.ld
-else ifeq ($(PROJECT_TARGET),stm32f446ret)
-	TARGET_C_SOURCES = \
-	$(filter-out %template.c, $(wildcard stm32f446ret/STM32F4xx_HAL_Driver/Src/*.c))
-	TARGET_ASM_SOURCES = \
-	stm32f446ret/startup_stm32f446xx.s
-	TARGET_C_DEFS = \
-	STM32F446xx
-	TARGET_C_INCLUDES = \
-	stm32f446ret/STM32F4xx_HAL_Driver/Inc \
-	stm32f446ret/STM32F4xx_HAL_Driver/Inc/Legacy \
-	stm32f446ret/CMSIS/Device/ST/STM32F4xx/Include \
-	stm32f446ret/CMSIS/Include
-	TARGET_LDSCRIPT = \
-	stm32f446ret/STM32F446RETx_FLASH.ld
-else ifeq ($(PROJECT_TARGET),stm32l476rgt)
-	TARGET_C_SOURCES = \
-	$(filter-out %template.c, $(wildcard stm32l476rgt/STM32L4xx_HAL_Driver/Src/*.c))
-	TARGET_ASM_SOURCES = \
-	stm32l476rgt/startup_stm32l476xx.s
-	TARGET_C_DEFS = \
-	STM32L476xx
-	TARGET_C_INCLUDES = \
-	stm32l476rgt/STM32L4xx_HAL_Driver/Inc \
-	stm32l476rgt/STM32L4xx_HAL_Driver/Inc/Legacy \
-	stm32l476rgt/CMSIS/Device/ST/STM32L4xx/Include \
-	stm32l476rgt/CMSIS/Include
-	TARGET_LDSCRIPT = \
-	stm32l476rgt/STM32L476RGTx_FLASH.ld
-else
-	$(error PROJECT_TARGET is unsupported. Please choose a supported target to build for.)
-endif
+SERIES = $(shell echo $(PROJECT_TARGET) | cut -c6-7)
+LINE = $(shell echo $(PROJECT_TARGET) | cut -c8-9)
+EXTRA = $(shell echo $(PROJECT_TARGET) | cut -c10-)
+
+SERIES_CAP = $(shell echo $(SERIES) | tr '[:lower:]' '[:upper:]')
+EXTRA_CAP = $(shell echo $(EXTRA) | tr '[:lower:]' '[:upper:]')
+SERIES_GENERIC = stm32$(SERIES)xx
+SERIES_GENERIC_CAP = STM32$(SERIES_CAP)xx
+SERIES_LINE = stm32$(SERIES)$(LINE)
+SERIES_LINE_CAP = STM32$(SERIES_CAP)$(LINE)
+SERIES_LINE_GENERIC = $(SERIES_LINE)xx
+SERIES_LINE_GENERIC_CAP = $(SERIES_LINE_CAP)xx
 
 TARGET = $(PROJECT_TARGET)
 
@@ -91,13 +58,17 @@ BUILD_DIR = $(PROJECT_BUILD_DIR)
 # C sources
 C_SOURCES =  \
 $(PROJECT_C_SOURCES) \
-$(TARGET_C_SOURCES) \
-sysmem.c \
-syscalls.c
+$(filter-out %template.c, $(wildcard $(SERIES_GENERIC)/$(SERIES_GENERIC_CAP)_HAL_Driver/Src/*.c)) \
+$(SERIES_GENERIC)/system_$(SERIES_GENERIC).c \
+$(SERIES_GENERIC)/$(SERIES_GENERIC)_hal_init.c \
+$(SERIES_GENERIC)/$(SERIES_GENERIC)_hal_timebase_tim.c \
+$(wildcard FreeRTOS-Kernel/*.c) \
+FreeRTOS-Kernel/portable/GCC/ARM_CM4F/port.c \
+$(wildcard common/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
-$(TARGET_ASM_SOURCES)
+$(SERIES_GENERIC)/$(SERIES_LINE)/startup_$(SERIES_LINE_GENERIC).s
 
 # ASM sources
 ASMM_SOURCES = 
@@ -144,23 +115,31 @@ AS_DEFS =
 
 # C defines
 C_DEFS =  \
--DUSE_HAL_DRIVER \
-$(addprefix -D,$(TARGET_C_DEFS))
+USE_HAL_DRIVER \
+$(SERIES_LINE_GENERIC_CAP)
 
+C_DEFS := $(addprefix -D,$(C_DEFS))
 
 # AS includes
 AS_INCLUDES = 
 
 # C includes
 C_INCLUDES =  \
-$(addprefix -I,$(PROJECT_C_INCLUDES)) \
-$(addprefix -I,$(TARGET_C_INCLUDES))
+$(PROJECT_C_INCLUDES) \
+$(SERIES_GENERIC)/$(SERIES_GENERIC_CAP)_HAL_Driver/Inc \
+$(SERIES_GENERIC)/$(SERIES_GENERIC_CAP)_HAL_Driver/Inc/Legacy \
+$(SERIES_GENERIC)/CMSIS/Device/ST/$(SERIES_GENERIC_CAP)/Include \
+$(SERIES_GENERIC)/CMSIS/Include \
+FreeRTOS-Kernel/include \
+FreeRTOS-Kernel/portable/GCC/ARM_CM4F \
+common/Inc
 
+C_INCLUDES := $(addprefix -I,$(C_INCLUDES))
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -Werror -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -Werror -Wfatal-errors -fdata-sections -ffunction-sections
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -fdata-sections -ffunction-sections
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -Wfatal-errors -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -175,7 +154,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = $(TARGET_LDSCRIPT)
+LDSCRIPT = $(SERIES_GENERIC)/$(SERIES_LINE)/$(SERIES_LINE_CAP)$(EXTRA_CAP)x_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 
@@ -227,7 +206,7 @@ clean:
 
 
 #######################################
-# clean up
+# flash
 #######################################
 flash:
 	-st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
