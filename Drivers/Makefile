@@ -210,7 +210,29 @@ clean:
 #######################################
 flash:
 	-st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-  
+
+
+#######################################
+# tidy
+#######################################
+TIDY_FLAGS ?= --config-file=../.clang-tidy
+TIDY_C_FLAGS := $(C_INCLUDES) $(C_DEFS)
+# TIDY_CFLAGS += -m32
+
+BLAH = %/stm32f4xx_hal_conf.h %/stm32l4xx_hal_conf.h %/FreeRTOSConfig.h
+
+tidy:
+	clang-tidy $(TIDY_FLAGS) $(PROJECT_C_SOURCES) $(filter-out $(BLAH), $(CRAP)) --fix -- $(TIDY_C_FLAGS)
+
+
+#######################################
+# format
+#######################################
+FORMAT_FLAGS = --config-file=../.clang-format
+
+format:
+	clang-format -i $(PROJECT_C_SOURCES) $(filter-out $(BLAH), $(CRAP))
+
 
 #######################################
 # dependencies
