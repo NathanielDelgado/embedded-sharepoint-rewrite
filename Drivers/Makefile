@@ -18,6 +18,15 @@ $(error PROJECT_C_INCLUDES is not defined. Please provide a set of C header file
 endif
 
 
+#######################################
+# clang
+#######################################
+IGNORED_CLANG_INPUTS = %/stm32f4xx_hal_conf.h %/stm32l4xx_hal_conf.h %/FreeRTOSConfig.h
+
+CLANG_INPUTS = $(PROJECT_C_SOURCES) $(foreach DIR, $(PROJECT_C_INCLUDES), $(wildcard $(DIR)/*))
+CLANG_INPUTS := $(filter-out $(IGNORED_CLANG_INPUTS), $(CLANG_INPUTS))
+
+
 ######################################
 # target
 ######################################
@@ -208,30 +217,36 @@ clean:
 #######################################
 # flash
 #######################################
+FLASH_ADDRESS ?= 0x8000000
+
 flash:
-	-st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+	-st-flash write $(BUILD_DIR)/$(TARGET).bin $(FLASH_ADDRESS)
 
 
 #######################################
 # tidy
 #######################################
-TIDY_FLAGS ?= --config-file=../.clang-tidy
-TIDY_C_FLAGS := $(C_INCLUDES) $(C_DEFS)
+TIDY_CONFIG ?= --config-file=../.clang-tidy
+TIDY_C_FLAGS = $(C_INCLUDES) $(C_DEFS)
 # TIDY_CFLAGS += -m32
 
-BLAH = %/stm32f4xx_hal_conf.h %/stm32l4xx_hal_conf.h %/FreeRTOSConfig.h
-
 tidy:
-	clang-tidy $(TIDY_FLAGS) $(PROJECT_C_SOURCES) $(filter-out $(BLAH), $(CRAP)) --fix -- $(TIDY_C_FLAGS)
+	-clang-tidy $(TIDY_CONFIG) $(CLANG_INPUTS) -- $(TIDY_C_FLAGS)
+
+tidy-fix:
+	-clang-tidy $(TIDY_CONFIG) $(CLANG_INPUTS) --fix -- $(TIDY_C_FLAGS)
 
 
 #######################################
 # format
 #######################################
-FORMAT_FLAGS = --config-file=../.clang-format
+FORMAT_CONFIG ?= --style=file:../.clang-format
 
 format:
-	clang-format -i $(PROJECT_C_SOURCES) $(filter-out $(BLAH), $(CRAP))
+	-clang-format $(FORMAT_CONFIG) $(CLANG_INPUTS)
+
+format-fix:
+	-clang-format -i $(FORMAT_CONFIG) $(CLANG_INPUTS)
 
 
 #######################################

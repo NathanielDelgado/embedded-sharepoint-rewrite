@@ -1,16 +1,16 @@
 TEST ?= main
 PROJECT_TARGET ?= stm32f446ret
-PROJECT_C_SOURCES := $(wildcard Src/*.c)
-PROJECT_C_INCLUDES := Inc
-PROJECT_BUILD_DIR := ../build
+PROJECT_C_SOURCES = $(wildcard Src/*.c)
+PROJECT_C_INCLUDES = Inc
+PROJECT_BUILD_DIR = ../build
 DRIVERS_DIR = ../Drivers
 
-MAKEFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+MAKEFILE_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 PROJECT_C_SOURCES += Test/$(TEST).c
-PROJECT_C_SOURCES := $(addprefix $(MAKEFILE_DIR)/,$(PROJECT_C_SOURCES))
-PROJECT_C_INCLUDES := $(addprefix $(MAKEFILE_DIR)/,$(PROJECT_C_INCLUDES))
-PROJECT_BUILD_DIR := $(addprefix $(MAKEFILE_DIR)/,$(PROJECT_BUILD_DIR))
+PROJECT_C_SOURCES := $(addprefix $(MAKEFILE_DIR)/, $(PROJECT_C_SOURCES))
+PROJECT_C_INCLUDES := $(addprefix $(MAKEFILE_DIR)/, $(PROJECT_C_INCLUDES))
+PROJECT_BUILD_DIR := $(addprefix $(MAKEFILE_DIR)/, $(PROJECT_BUILD_DIR))
 
 export PROJECT_TARGET
 export PROJECT_C_SOURCES

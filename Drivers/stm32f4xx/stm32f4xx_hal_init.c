@@ -1,9 +1,9 @@
 #include "stm32f4xx_hal.h"
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief This function is executed in case of error occurrence.
+ * 
+ */
 static void Error_Handler(void)
 {
   __disable_irq();
@@ -13,8 +13,9 @@ static void Error_Handler(void)
 }
 
 /**
-  * Initializes the Global MSP.
-  */
+ * @brief Initializes the Global MSP.
+ * 
+ */
 void HAL_MspInit(void)
 {
   __HAL_RCC_SYSCFG_CLK_ENABLE();
@@ -26,9 +27,9 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * 
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};

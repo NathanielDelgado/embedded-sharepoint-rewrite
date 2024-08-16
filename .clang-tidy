@@ -1,4 +1,5 @@
 ---
+# readability-identifier-naming based on Google C++ Style Guide
 Checks: "clang-diagnostic-*,
         clang-analyzer-*,
         -*,
