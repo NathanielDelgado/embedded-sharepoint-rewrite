@@ -3429,7 +3429,7 @@ HAL_StatusTypeDef HAL_MMC_SleepDevice(MMC_HandleTypeDef *hmmc)
             /* Field SLEEP_NOTIFICATION_TIME [216] */
             sleep_timeout = ((hmmc->Ext_CSD[(MMC_EXT_CSD_SLEEP_NOTIFICATION_TIME_INDEX/4)] >> MMC_EXT_CSD_SLEEP_NOTIFICATION_TIME_POS) & 0x000000FFU);
 
-            /* Sleep/Awake Timeout = 10µs * 2^SLEEP_NOTIFICATION_TIME, max value of SLEEP_NOTIFICATION_TIME is 0x17 */
+            /* Sleep/Awake Timeout = 10?s * 2^SLEEP_NOTIFICATION_TIME, max value of SLEEP_NOTIFICATION_TIME is 0x17 */
             /* In HAL, the tick interrupt occurs each ms */
             timeout = (((1UL << (sleep_timeout & 0x1FU)) / 100U) + 1U);
 
