@@ -251,6 +251,20 @@ format-fix:
 
 
 #######################################
+# help
+#######################################
+help:
+	@echo "Available targets:"
+	@echo "  all          - Build the project."
+	@echo "  clean        - Remove build artifacts."
+	@echo "  flash        - Flash the target device."
+	@echo "  tidy         - Run clang-tidy."
+	@echo "  tidy-fix     - Run clang-tidy with fixes."
+	@echo "  format       - Run clang-format."
+	@echo "  format-fix   - Run clang-format and apply fixes."
+
+
+#######################################
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
